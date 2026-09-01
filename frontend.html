@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GETAJOB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0b0c;
+    --panel: #121214;
+    --line: #232326;
+    --text: #f2f2f0;
+    --muted: #8b8b8f;
+    --amber: #f2c14e;
+    --amber-dim: #3a3220;
+    --mentorship: #7c6cf0;
+    --mentorship-dim: #24203f;
+    --money: #7ed99a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--line);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.02em;
+  }
+  .logo .arrow {
+    width: 40px; height: 40px;
+    background: var(--amber);
+    color: #1a1a1a;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  #searchBtn {
+    width: 44px; height: 44px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .resultCount { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+  .divider { width: 1px; height: 24px; background: var(--line); }
+  select#sort {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+  }
+  #scrapeBtn {
+    margin-left: auto;
+    background: var(--amber);
+    color: #1a1a1a;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  #scrapeBtn:disabled { opacity: 0.6; cursor: default; }
+
+  .chipbar {
+    display: flex;
+    gap: 12px;
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .chipbar .divider { align-self: center; }
+  .chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    padding: 10px 18px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+    background: transparent;
+  }
+  .chip.active { border-color: var(--amber); color: var(--amber); }
+
+  .layout { display: flex; }
+  aside {
+    width: 300px;
+    padding: 28px 24px;
+    border-right: 1px solid var(--line);
+  }
+  aside .section-title {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--amber);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+  .catgroup { margin-bottom: 28px; }
+  .catgroup h3 { color: var(--amber); font-size: 16px; margin: 0 0 12px; }
+  .catrow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    font-size: 15px;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .catrow .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    border: 1px solid var(--muted);
+    margin-right: 10px;
+    display: inline-block;
+  }
+  .catrow.selected .dot { background: var(--amber); border-color: var(--amber); }
+  .catrow .count { font-family: 'JetBrains Mono', monospace; color: var(--muted); font-size: 13px; }
+  .catrow .name { display: flex; align-items: center; }
+
+  main { flex: 1; padding: 28px 32px; }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    background: var(--panel);
+  }
+  .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .badges { display: flex; gap: 10px; }
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--amber);
+    color: var(--amber);
+  }
+  .badge.mentorship { border-color: var(--mentorship); color: var(--mentorship); }
+  .badge.new { background: var(--amber-dim); border-color: var(--amber); }
+  .badge.mentorship.new { background: var(--mentorship-dim); border-color: var(--mentorship); }
+  .card-top .source { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+  .card h2 { margin: 0 0 4px; font-size: 22px; }
+  .card .company { color: var(--muted); margin: 0 0 16px; font-size: 16px; }
+
+  .facts {
+    display: flex;
+    gap: 22px;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .facts .stipend { color: var(--money); }
+
+  .tags { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--muted);
+  }
+
+  .card-bottom {
+    display: flex;
+    gap: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--muted);
+    align-items: center;
+  }
+  .card-bottom a { margin-left: auto; color: var(--amber); text-decoration: none; }
+  .empty { text-align: center; color: var(--muted); padding: 60px 0; font-family: 'JetBrains Mono', monospace; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span class="arrow">&rarr;</span> GETAJOB</div>
+  <button id="searchBtn">&#128269;</button>
+  <div class="resultCount" id="resultCount">0 results</div>
+  <div class="divider"></div>
+  <select id="sort" class="mono">
+    <option value="newest">Newest first</option>
+    <option value="deadline">Deadline soonest</option>
+  </select>
+  <div class="divider"></div>
+  <button id="scrapeBtn">&#10059; Scrape Now</button>
+</header>
+
+<div class="chipbar" id="typeChips">
+  <div class="chip" data-group="listing_types" data-val="Internship">Internship</div>
+  <div class="chip" data-group="listing_types" data-val="Mentorship">Mentorship</div>
+  <div class="chip" data-group="listing_types" data-val="Program">Program</div>
+  <div class="chip" data-group="listing_types" data-val="Training">Training</div>
+  <div class="divider"></div>
+  <div class="chip" data-group="work_mode" data-val="Remote">Remote</div>
+  <div class="chip" data-group="work_mode" data-val="Hybrid">Hybrid</div>
+  <div class="chip" data-group="work_mode" data-val="In-Person">In-Person</div>
+</div>
+
+<div class="layout">
+  <aside>
+    <div class="section-title">CATEGORIES</div>
+    <div id="categoryTree"></div>
+  </aside>
+
+  <main>
+    <div id="list"></div>
+  </main>
+</div>
+
+<script>
+  // change this if your backend runs somewhere other than localhost:5000
+  const API = "http://localhost:5000";
+
+  // category tree shown in the sidebar — edit this to match what you actually want to track
+  const CATEGORY_TREE = {
+    "Computer Science": ["Cybersecurity", "Software Engineering", "Data Science", "Artificial Intelligence", "Cloud Computing"],
+    "Business": ["Finance & Technology", "Marketing", "Entrepreneurship"],
+    "Engineering": ["Electrical", "Mechanical", "Civil"]
+  };
+
+  const state = { listing_types: new Set(), work_mode: new Set(), subcategories: new Set() };
+  let allListings = [];
+
+  // builds the sidebar category tree with a live count of matching listings next to each item
+  function renderCategoryTree() {
+    const tree = document.getElementById("categoryTree");
+    tree.innerHTML = Object.entries(CATEGORY_TREE).map(([group, subs]) => `
+      <div class="catgroup">
+        <h3>${group}</h3>
+        ${subs.map(s => {
+          const count = allListings.filter(l => l.subcategory === s).length;
+          const selected = state.subcategories.has(s) ? "selected" : "";
+          return `<div class="catrow ${selected}" data-sub="${s}">
+                    <span class="name"><span class="dot"></span>${s}</span>
+                    <span class="count">${count}</span>
+                  </div>`;
+        }).join("")}
+      </div>
+    `).join("");
+    tree.querySelectorAll(".catrow").forEach(row => {
+      row.addEventListener("click", () => {
+        const sub = row.dataset.sub;
+        state.subcategories.has(sub) ? state.subcategories.delete(sub) : state.subcategories.add(sub);
+        renderCategoryTree();
+        renderList();
+      });
+    });
+  }
+
+  // toggles a filter chip on/off and re-renders the list against the new filter state
+  function wireChips() {
+    document.querySelectorAll(".chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        const group = state[chip.dataset.group];
+        const val = chip.dataset.val;
+        group.has(val) ? group.delete(val) : group.add(val);
+        chip.classList.toggle("active");
+        renderList();
+      });
+    });
+  }
+
+  // applies the current chip/category selections to the full listings array
+  function applyFilters() {
+    return allListings.filter(l => {
+      if (state.listing_types.size && !state.listing_types.has(l.listing_type)) return false;
+      if (state.work_mode.size && !state.work_mode.has(l.work_mode)) return false;
+      if (state.subcategories.size && !state.subcategories.has(l.subcategory)) return false;
+      return true;
+    });
+  }
+
+  // returns true if a listing was received in the last 24 hours, used to show the NEW badge
+  function isNew(l) {
+    if (!l.received_at) return false;
+    const hours = (Date.now() - new Date(l.received_at).getTime()) / 36e5;
+    return hours < 24;
+  }
+
+  // renders one listing as a card matching the Figma layout
+  function cardHTML(l) {
+    const mentorshipClass = l.listing_type === "Mentorship" ? "mentorship" : "";
+    return `
+      <div class="card">
+        <div class="card-top">
+          <div class="badges">
+            <span class="badge ${mentorshipClass}">${(l.listing_type || "").toUpperCase()}</span>
+            ${isNew(l) ? `<span class="badge ${mentorshipClass} new">NEW</span>` : ""}
+          </div>
+          <span class="source">${l.company || ""}</span>
+        </div>
+        <h2>${l.title || "Untitled"}</h2>
+        <p class="company">${l.company || ""}${l.subcategory ? " — " + l.subcategory : ""}</p>
+        <div class="facts mono">
+          <span>&#128205; ${l.location || "—"}</span>
+          <span>&#9679; ${l.work_mode || "—"}</span>
+          <span>&#128337; ${l.duration || "unknown"}</span>
+          <span class="stipend">$ ${l.stipend || "unknown"}</span>
+        </div>
+        <div class="tags">
+          ${l.category ? `<span class="tag">${l.category}</span>` : ""}
+          ${l.subcategory ? `<span class="tag">${l.subcategory}</span>` : ""}
+        </div>
+        <div class="card-bottom">
+          <span>Posted ${l.date_posted || "unknown"}</span>
+          <span>Deadline ${l.deadline || "unknown"}</span>
+          <a href="${l.url}" target="_blank" rel="noopener">View listing &rarr;</a>
+        </div>
+      </div>
+    `;
+  }
+
+  // redraws the listings list against current filters and updates the result count
+  function renderList() {
+    const filtered = applyFilters();
+    document.getElementById("resultCount").textContent = `${filtered.length} results`;
+    const list = document.getElementById("list");
+    list.innerHTML = filtered.length
+      ? filtered.map(cardHTML).join("")
+      : `<div class="empty">No listings match these filters yet.</div>`;
+  }
+
+  // pulls the latest stored listings from the backend
+  async function loadListings() {
+    const res = await fetch(`${API}/api/listings`);
+    allListings = await res.json();
+    renderCategoryTree();
+    renderList();
+  }
+
+  // saves the current chip/category selections as your preference profile, so the agent uses them too
+  async function savePreferencesFromState() {
+    await fetch(`${API}/api/preferences`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        listing_types: [...state.listing_types],
+        work_mode: [...state.work_mode],
+        subcategories: [...state.subcategories],
+        categories: [],
+        company_type: [],
+        paid_only: false,
+        min_date_posted: "",
+        excluded_companies: []
+      })
+    });
+  }
+
+  // calls the backend's manual trigger endpoint, which invokes the Gemini Enterprise agent immediately
+  async function scrapeNow() {
+    const btn = document.getElementById("scrapeBtn");
+    btn.disabled = true;
+    btn.textContent = "Scraping…";
+    await savePreferencesFromState();
+    try {
+      await fetch(`${API}/api/trigger`, { method: "POST" });
+    } catch (e) {
+      console.error("Trigger failed:", e);
+    }
+    setTimeout(async () => {
+      await loadListings();
+      btn.disabled = false;
+      btn.textContent = "\u2733 Scrape Now";
+    }, 8000); // gives the agent a few seconds to run and post results back
+  }
+
+  document.getElementById("scrapeBtn").addEventListener("click", scrapeNow);
+  wireChips();
+  loadListings();
+  setInterval(loadListings, 5 * 60 * 1000); // background refresh every 5 min between agent runs
+</script>
+
+</body>
+</html>
